@@ -109,7 +109,7 @@ public final class SentryBootstrap {
         factory.setEnvironment(environment);
         factory.setRelease(release);
         factory.setServerName(serverName);
-        thresholdOptional.ifPresent(t -> factory.setThreshold(t));
+        thresholdOptional.ifPresent(factory::setThreshold);
 
         registerAppender(dsn, cleanRootLogger, factory);
     }
