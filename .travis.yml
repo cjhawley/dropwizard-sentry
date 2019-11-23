@@ -2,4 +2,3 @@ language: java
 jdk:
   - openjdk11
 install: true
-script: . .travis/script.sh
