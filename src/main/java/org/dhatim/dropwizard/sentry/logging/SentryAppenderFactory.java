@@ -145,7 +145,7 @@ public class SentryAppenderFactory extends AbstractAppenderFactory<ILoggingEvent
         try {
             String factoryClassName = sentryClientFactory.orElse(DefaultSentryClientFactory.class.getCanonicalName());
             Class<? extends SentryClientFactory> factoryClass = Class.forName(factoryClassName).asSubclass(SentryClientFactory.class);
-            factory = factoryClass.newInstance();
+            factory = factoryClass.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException ex) {
             throw new RuntimeException(ex);
         }
@@ -157,7 +157,8 @@ public class SentryAppenderFactory extends AbstractAppenderFactory<ILoggingEvent
             } else {
                 dsn += '&';
             }
-            dsn += "stacktrace.app.packages=" + stacktraceAppPackages.map(list -> list.stream().collect(Collectors.joining(","))).orElse("");
+            dsn += "stacktrace.app.packages=" + stacktraceAppPackages.map(list -> String
+                .join(",", list)).orElse("");
         }
         SentryClient sentryClient = SentryClientFactory.sentryClient(dsn, factory);
 
@@ -175,7 +176,7 @@ public class SentryAppenderFactory extends AbstractAppenderFactory<ILoggingEvent
         Sentry.setStoredClient(sentryClient);
 
         appender.addFilter(levelFilterFactory.build(threshold));
-        getFilterFactories().stream().forEach(f -> appender.addFilter(f.build()));
+        getFilterFactories().forEach(f -> appender.addFilter(f.build()));
         appender.start();
 
         final Appender<ILoggingEvent> asyncAppender = wrapAsync(appender, asyncAppenderFactory, context);
